@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Teams and Players</title>
+</head>
+<body>
+    <h1>MLB Team and Player Selector</h1>
+
+    <label for="team">Select a Team:</label>
+    <select id="team" name="team">
+        <option value="">-- Select Team --</option>
+    </select>
+
+    <label for="players">Select Players:</label>
+    <select id="players" name="players" multiple>
+        <!-- Players will be loaded dynamically -->
+    </select>
+
+    <script>
+        // Load teams into dropdown
+        async function loadTeams() {
+            const response = await fetch('/teams');
+            const teams = await response.json();
+            const teamDropdown = document.getElementById('team');
+
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team.id;
+                option.textContent = team.name;
+                teamDropdown.appendChild(option);
+            });
+        }
+
+        // Load players for selected team
+        async function loadPlayers(teamId) {
+            if (!teamId) {
+                document.getElementById('players').innerHTML = ''; // Clear players
+                return;
+            }
+
+            const response = await fetch(`/players/${teamId}`);
+            const players = await response.json();
+            const playersDropdown = document.getElementById('players');
+
+            playersDropdown.innerHTML = ''; // Clear existing players
+            players.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.id;
+                option.textContent = `${player.name} (${player.position})`;
+                playersDropdown.appendChild(option);
+            });
+        }
+
+        // Add event listener for team selection
+        document.getElementById('team').addEventListener('change', (e) => {
+            loadPlayers(e.target.value);
+        });
+
+        // Load teams on page load
+        loadTeams();
+    </script>
+</body>
+</html>
