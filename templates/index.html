@@ -4,25 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MLB Trade Simulator</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>MLB Trade Simulator</h1>
+    <div class="container">
+        <h1>MLB Trade Simulator</h1>
 
-    <!-- Team 1 Selection -->
-    <label for="team1">Select Team 1:</label>
-    <select id="team1" name="team1"></select>
+        <!-- Team 1 Selection -->
+        <label for="team1">Select Team 1:</label>
+        <select id="team1" name="team1"></select>
 
-    <!-- Players for Team 1 -->
-    <label for="team1-players">Players from Team 1:</label>
-    <select id="team1-players" name="team1-players" multiple></select>
+        <!-- Players for Team 1 -->
+        <label for="team1-players">Select Players from Team 1:</label>
+        <select id="team1-players" multiple></select>
 
-    <!-- Team 2 Selection -->
-    <label for="team2">Select Team 2:</label>
-    <select id="team2" name="team2"></select>
+        <!-- Display Selected Players for Team 1 -->
+        <h3>Team 1 Trade Players:</h3>
+        <ul id="team1-selected"></ul>
 
-    <!-- Players for Team 2 -->
-    <label for="team2-players">Players from Team 2:</label>
-    <select id="team2-players" name="team2-players" multiple></select>
+        <!-- Team 2 Selection -->
+        <label for="team2">Select Team 2:</label>
+        <select id="team2" name="team2"></select>
+
+        <!-- Players for Team 2 -->
+        <label for="team2-players">Select Players from Team 2:</label>
+        <select id="team2-players" multiple></select>
+
+        <!-- Display Selected Players for Team 2 -->
+        <h3>Team 2 Trade Players:</h3>
+        <ul id="team2-selected"></ul>
+
+        <button type="button" onclick="submitTrade()">Submit Trade</button>
+    </div>
 
     <script>
         // Function to load teams into both team dropdowns
@@ -34,13 +47,11 @@
             const team2Dropdown = document.getElementById('team2');
 
             teams.forEach(team => {
-                // Populate Team 1 dropdown
                 const option1 = document.createElement('option');
                 option1.value = team.id;
                 option1.textContent = team.name;
                 team1Dropdown.appendChild(option1);
 
-                // Populate Team 2 dropdown
                 const option2 = document.createElement('option');
                 option2.value = team.id;
                 option2.textContent = team.name;
@@ -69,6 +80,32 @@
             });
         }
 
+        // Function to handle player selection
+        function handlePlayerSelection(team, dropdownId, listId) {
+            const dropdown = document.getElementById(dropdownId);
+            const selectedList = document.getElementById(listId);
+
+            Array.from(dropdown.selectedOptions).forEach(option => {
+                // Prevent duplicate selections
+                if (!document.getElementById(`${team}-player-${option.value}`)) {
+                    const listItem = document.createElement('li');
+                    listItem.id = `${team}-player-${option.value}`;
+                    listItem.textContent = option.textContent;
+                    
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = "Remove";
+                    removeBtn.onclick = () => listItem.remove();
+
+                    listItem.appendChild(removeBtn);
+                    selectedList.appendChild(listItem);
+                }
+            });
+
+            // Clear selection in dropdown after adding players
+            dropdown.selectedIndex = -1;
+        }
+
         // Event listeners for Team 1 and Team 2 selection
         document.getElementById('team1').addEventListener('change', (e) => {
             loadPlayers(e.target.value, 'team1-players');
@@ -76,6 +113,15 @@
 
         document.getElementById('team2').addEventListener('change', (e) => {
             loadPlayers(e.target.value, 'team2-players');
+        });
+
+        // Event listeners for selecting players
+        document.getElementById('team1-players').addEventListener('change', () => {
+            handlePlayerSelection("team1", "team1-players", "team1-selected");
+        });
+
+        document.getElementById('team2-players').addEventListener('change', () => {
+            handlePlayerSelection("team2", "team2-players", "team2-selected");
         });
 
         // Load teams on page load
