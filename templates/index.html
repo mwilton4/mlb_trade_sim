@@ -3,59 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Teams and Players</title>
+    <title>MLB Trade Simulator</title>
 </head>
 <body>
-    <h1>MLB Team and Player Selector</h1>
+    <h1>MLB Trade Simulator</h1>
 
-    <label for="team">Select a Team:</label>
-    <select id="team" name="team">
-        <option value="">-- Select Team --</option>
-    </select>
+    <!-- Team 1 Selection -->
+    <label for="team1">Select Team 1:</label>
+    <select id="team1" name="team1"></select>
 
-    <label for="players">Select Players:</label>
-    <select id="players" name="players" multiple>
-        <!-- Players will be loaded dynamically -->
-    </select>
+    <!-- Players for Team 1 -->
+    <label for="team1-players">Players from Team 1:</label>
+    <select id="team1-players" name="team1-players" multiple></select>
+
+    <!-- Team 2 Selection -->
+    <label for="team2">Select Team 2:</label>
+    <select id="team2" name="team2"></select>
+
+    <!-- Players for Team 2 -->
+    <label for="team2-players">Players from Team 2:</label>
+    <select id="team2-players" name="team2-players" multiple></select>
 
     <script>
-        // Load teams into dropdown
+        // Function to load teams into both team dropdowns
         async function loadTeams() {
             const response = await fetch('/teams');
             const teams = await response.json();
-            const teamDropdown = document.getElementById('team');
+
+            const team1Dropdown = document.getElementById('team1');
+            const team2Dropdown = document.getElementById('team2');
 
             teams.forEach(team => {
-                const option = document.createElement('option');
-                option.value = team.id;
-                option.textContent = team.name;
-                teamDropdown.appendChild(option);
+                // Populate Team 1 dropdown
+                const option1 = document.createElement('option');
+                option1.value = team.id;
+                option1.textContent = team.name;
+                team1Dropdown.appendChild(option1);
+
+                // Populate Team 2 dropdown
+                const option2 = document.createElement('option');
+                option2.value = team.id;
+                option2.textContent = team.name;
+                team2Dropdown.appendChild(option2);
             });
         }
 
-        // Load players for selected team
-        async function loadPlayers(teamId) {
+        // Function to load players for a selected team
+        async function loadPlayers(teamId, dropdownId) {
             if (!teamId) {
-                document.getElementById('players').innerHTML = ''; // Clear players
+                document.getElementById(dropdownId).innerHTML = ''; // Clear previous players
                 return;
             }
 
             const response = await fetch(`/players/${teamId}`);
             const players = await response.json();
-            const playersDropdown = document.getElementById('players');
 
-            playersDropdown.innerHTML = ''; // Clear existing players
+            const playerDropdown = document.getElementById(dropdownId);
+            playerDropdown.innerHTML = ''; // Clear existing options
+
             players.forEach(player => {
                 const option = document.createElement('option');
                 option.value = player.id;
                 option.textContent = `${player.name} (${player.position})`;
-                playersDropdown.appendChild(option);
+                playerDropdown.appendChild(option);
             });
         }
 
-        // Add event listener for team selection
-        document.getElementById('team').addEventListener('change', (e) => {
-            loadPlayers(e.target.value);
+        // Event listeners for Team 1 and Team 2 selection
+        document.getElementById('team1').addEventListener('change', (e) => {
+            loadPlayers(e.target.value, 'team1-players');
+        });
+
+        document.getElementById('team2').addEventListener('change', (e) => {
+            loadPlayers(e.target.value, 'team2-players');
         });
 
         // Load teams on page load
